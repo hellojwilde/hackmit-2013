@@ -108,6 +108,7 @@
 
 			if (date) {
 				return {
+					type: "time",
 					subject: "time",
 					verb: "is",
 					to: date
@@ -121,6 +122,7 @@
 			// "i am here"
 			if (_pos("NN", "VBP", "RB")) {
 				return {
+					type: "location",
 					subject: _chompVal(),
 					verb: _chompVal(),
 					to: _chompVal()
@@ -128,6 +130,7 @@
 			// "i am at copley square"
 			} else if (_pos("NN", "VBP", "IN", "NN")) {
 				return {
+					type: "location",
 					subject: _chompVal(),
 					verb: _chompVal(),
 					to: (function () { 

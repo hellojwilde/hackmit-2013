@@ -17,16 +17,62 @@ App.Store = {
 };
 
 App.Disambiguator = {
-	time: function (ambig, completeFn) {
+	_filler: null,
+	fill: function (input) {
+		if (this._filler) this._filler(input);
+	},
 
+	time: function (ambig, completeFn) {
+		ambig.to = Date.parse(ambig.to);
+		completeFn(ambig);
 	},
 
 	location: function (ambig, completeFn) {
+		if (ambig.to == "here") {
+			if (!navigator.geolocation) {
+				App.Store.appendToTimeline({
+					"type": "error",
+					"text": "I'm not able to figure out where 'here' is."
+				});
+				return;
+			}
 
+			navigator.geolocation.getCurrentPosition(function(position) {
+	      ambig.lat = position.coords.latitude;
+	      ambig.lon = position.coords.longitude;
+	      completeFn(ambig);
+	    });
+		} else {
+			// TODO
+		}
 	},
 
-	person: function (ambig, completeFn) {
-		
+	send: function (ambig, completeFn) {
+		var options = [
+			"Mary Jones",
+			"Mary James"
+		];
+
+		App.Store.appendToTimeline({
+  		type: "question",
+  		what: "person",
+  		ambiguous: "mary",
+  		options: Ember.A(options)
+		});
+
+		this._filler = function (input) {
+			var cmp = options.map(function (e) { return e.toLowerCase(); });
+			var idx = cmp.indexOf(input.toLowerCase());
+			if (idx == -1) {
+				App.Store.appendToTimeline({
+					"type": "error",
+					"text": "Sorry, I don't understand '" + input + "'."
+				});
+			} else {
+				ambig.recipient = options[idx];
+				completeFn(ambig);
+			}
+		}
 	}
 };
 
@@ -38,12 +84,32 @@ App.NLP = {
 		return psr.parse(tagged);
 	},
 
-	disambiguating: null,
-	startDisambiguation: function (completeFn) {
+	startDisambiguation: function (ambig, completeFn) {
+		function _clarifyAction() {
+			App.Disambiguator[ambig.action.verb](ambig.action,
+				function (unambig) {
+					ambig.action = unambig;
+					completeFn(ambig);
+				});
+		}
 
+		function _clarifyCond() {
+			App.Disambiguator[ambig.condition.type](ambig.condition, 
+				function (unambig) {
+					ambig.condition = unambig;
+					_clarifyAction();
+				});
+		}
+
+		if (ambig.condition) {
+			_clarifyCond();
+		} else {
+			_clarifyAction();
+		}
 	},
-	selectDisambiguation: function (response) {
 
+	endDisambiguation: function () {
+		App.Disambiguator._fill = null;
 	}
 };
 
@@ -77,12 +143,21 @@ App.IndexController = Ember.ArrayController.extend(Ember.Evented, {
 			  	});
 	  		} else {
 	  			this.set("isDisambiguating", true);
-	  			App.NLP.startDisambiguation(function () {
+	  			App.NLP.startDisambiguation(raw, function (disambig) {
+	  				this.set("isDisambiguating", false);
 
+	  				var event = Ember.copy(disambig);
+	  				event.type = "rule";
+	  				App.Store.appendToTimeline(event);
 	  			}.bind(this));
 	  		}
 	  	} else {
+	  		if (input.toLowerCase() == "cancel") {
+	  			App.NLP.endDisambiguation();
+	  			this.et("isDisambiguating", false);
+	  		}
 
+	  		App.Disambiguator.fill(input);
 	  	}
   	}
   }
@@ -95,6 +170,14 @@ App.EventController = Ember.ObjectController.extend({
 
 	isError: Ember.computed(function () {
 		return this.get("type") == "error";
+	}).property("type"),
+
+	isQuestion: Ember.computed(function () {
+		return this.get("type") == "question";
+	}).property("type"),
+
+	isRule: Ember.computed(function () {
+		return this.get("type") == "rule";
 	}).property("type")
 });
 
@@ -110,7 +193,7 @@ App.IndexView = Ember.View.extend({
 		var timeline = this.$(".app-timeline");
 		timeline[0].scrollHeight = (timeline[0].scrollTop);
 	}
-})
+});
 
 App.SpeechTextField = Ember.TextField.extend({
 	attributeBindings: ['x-webkit-speech'],
@@ -122,7 +205,7 @@ App.MapImageComponent = Ember.Component.extend({
 	lat: 0,
 	lon: 0,
 
-	mapUrl: function () {
+	mapUrl: Ember.computed(function () {
 		var lat = this.get('lat'),
 			  lon = this.get('lon'),
 			  apiKey = this.get('apiKey');
@@ -130,5 +213,5 @@ App.MapImageComponent = Ember.Component.extend({
 		return 'http://maps.googleapis.com/maps/api/staticmap?size=500x200' +
 		       '&zoom=14&markers=color:blue%7Clabel:S%7C' + lat + ',' + lon +
 		       '&visual_refresh=true&sensor=false&api_key=' + apiKey;
-	}.property('lat', 'lon', 'apiKey')
+	}).property('lat', 'lon', 'apiKey')
 });

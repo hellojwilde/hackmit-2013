@@ -26,6 +26,39 @@
           {{#if item.isError}}
           <blockquote class="from-app">{{item.text}}</blockquote>
           {{/if}}
+
+          {{#if item.isQuestion}}
+          <blockquote class="from-app">
+            Which <q>{{item.ambiguous}}</q> did you mean?
+          </blockquote>
+          <ul class="options">
+            {{#each option in item.options}}
+            <li>{{option}}</li>
+            {{/each}}
+          </ul>
+          {{/if}}
+
+          {{#if item.isRule}}
+          <blockquote class="from-app">
+            Okay, here is your rule:
+          </blockquote>
+
+          <dl class="rule">
+            <dt>If</dt>
+            {{#if item.isConditionLocation}}
+            <dd>at <q>{{item.condition.location.name}}</q></dd>
+            {{/if}}
+            {{#if item.isConditionTime}}
+            <dd>time is <q>{{item.condition.time.canonical}}</q></dd>
+            {{/if}}
+
+            <dt>Then</dt>
+            <dd>
+              send <q>{{item.response.content}}</q> 
+              to {{item.response.recipient.name}}
+            </dd>
+          </dl>
+          {{/if}}
         </li>
         {{else}}
         <li class="app-timeline-empty">
@@ -57,6 +90,7 @@
   <script src="js/libs/jquery-1.9.1.js"></script>
   <script src="js/libs/handlebars-1.0.0.js"></script>
   <script src="js/libs/ember-1.0.0.js"></script>
+  <script src="js/libs/date.js"></script>
 
   <script src="js/app.js"></script>
 
