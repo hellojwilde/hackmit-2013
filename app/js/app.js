@@ -12,6 +12,30 @@ App.Store = {
 	}
 };
 
+App.API = {
+	disambiguatePerson: function (person, callbackFn) {
+		// TODO
+		var options = [
+			"Mary Jones",
+			"Mary James"
+		];
+		callbackFn(options);
+	},
+
+	sendStatus: function (callbackFn) {
+
+	},
+
+	getJobs: function (callbackFn) {
+		var jobs = [];
+		callbackFn(jobs);
+	},
+
+	createJob: function (job, callbackFn) {
+		callbackFn();
+	}
+}
+
 App.Disambiguator = {
 	_filler: null,
 	fill: function (input) {
@@ -44,33 +68,30 @@ App.Disambiguator = {
 	},
 
 	send: function (ambig, completeFn) {
-		var options = [
-			"Mary Jones",
-			"Mary James"
-		];
+		function _options(options) {
+			App.Store.appendToTimeline({
+	  		type: "question",
+	  		what: "person",
+	  		ambiguous: ambig.recipient,
+	  		options: Ember.A(options)
+			});
 
-		console.log(ambig);
-
-		App.Store.appendToTimeline({
-  		type: "question",
-  		what: "person",
-  		ambiguous: ambig.recipient,
-  		options: Ember.A(options)
-		});
-
-		this._filler = function (input) {
-			var cmp = options.map(function (e) { return e.toLowerCase(); });
-			var idx = cmp.indexOf(input.toLowerCase());
-			if (idx == -1) {
-				App.Store.appendToTimeline({
-					"type": "error",
-					"text": "Sorry, I don't understand '" + input + "'."
-				});
-			} else {
-				ambig.recipient = options[idx];
-				completeFn(ambig);
+			this._filler = function (input) {
+				var cmp = options.map(function (e) { return e.toLowerCase(); });
+				var idx = cmp.indexOf(input.toLowerCase());
+				if (idx == -1) {
+					App.Store.appendToTimeline({
+						"type": "error",
+						"text": "Sorry, I don't understand '" + input + "'."
+					});
+				} else {
+					ambig.recipient = options[idx];
+					completeFn(ambig);
+				}
 			}
 		}
+
+		App.API.disambiguatePerson(ambig.recipient, _options);
 	}
 };
 
