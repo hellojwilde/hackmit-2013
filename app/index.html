@@ -35,7 +35,7 @@
           </blockquote>
           <ul class="options">
             {{#each option in item.options}}
-            <li>{{option}}</li>
+            <li>{{option.first_name}} {{option.last_name}}</li>
             {{/each}}
           </ul>
           {{/if}}
@@ -62,7 +62,7 @@
             <dd>
               send <q>{{item.action.content}}</q> 
               via {{item.action.method}}
-              to {{item.action.recipient}}
+              to {{item.action.recipient.first_name}} {{item.action.recipient.last_name}}
             </dd>
           </dl>
           {{/if}}

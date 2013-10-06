@@ -1,7 +1,15 @@
-App = Ember.Application.create();
+App = Ember.Application.create({
+	ready: function () {
+		// Send our current geolocation status every two minutes.
+		setInterval(function () {
+			App.API.sendStatus();
+		}, 1000 * 60 * 2);
+	}
+});
 
 App.Store = {
 	_timeline: Ember.A(),
+	_jobs: Ember.A(),
 
 	timeline: function () {
 		return this._timeline;
@@ -16,8 +24,10 @@ App.API = {
 	disambiguatePerson: function (person, callbackFn) {
 		// TODO
 		var options = [
-			"Mary Jones",
-			"Mary James"
+			{ first_name: "Mary",
+			  last_name: "Jones"},
+			{ first_name: "Mary",
+		    last_name: "James"}
 		];
 		callbackFn(options);
 	},
@@ -68,7 +78,7 @@ App.Disambiguator = {
 	},
 
 	send: function (ambig, completeFn) {
-		function _options(options) {
+		var _options = function(options) {
 			App.Store.appendToTimeline({
 	  		type: "question",
 	  		what: "person",
@@ -77,7 +87,10 @@ App.Disambiguator = {
 			});
 
 			this._filler = function (input) {
-				var cmp = options.map(function (e) { return e.toLowerCase(); });
+				var cmp = options.map(function (e) { 
+					return e.first_name.toLowerCase() + " " + e.last_name.toLowerCase(); 
+				});
+				console.log(cmp);
 				var idx = cmp.indexOf(input.toLowerCase());
 				if (idx == -1) {
 					App.Store.appendToTimeline({
@@ -89,7 +102,7 @@ App.Disambiguator = {
 					completeFn(ambig);
 				}
 			}
-		}
+		}.bind(this);
 
 		App.API.disambiguatePerson(ambig.recipient, _options);
 	}
@@ -178,6 +191,27 @@ App.IndexController = Ember.ArrayController.extend(Ember.Evented, {
   				var event = Ember.copy(disambig);
   				event.type = "rule";
   				App.Store.appendToTimeline(event);
+
+  				var job = {
+  					"first_name": disambig.action.recipient["first_name"],
+  					"last_name": disambig.action.recipient["last_name"],
+  					"action_type": disambig.action.method,
+  					"text_body": disambig.action.content,
+  					"latitude": "",
+  					"longitude": "",
+  					"action_time": ""
+  				};
+
+  				if (disambig.condition.type == "time") {
+  					job.action_time = disambig.condition.to.toISOString();
+  				}
+
+  				if (disambig.condition.type == "location") {
+  					job.latitude = disambig.condition.lat;
+  					job.longitude = disambig.condition.lon;
+  				}
+
+  				App.API.createJob(job, function () {});
   			}.bind(this), this);
   		}
   	} else {
