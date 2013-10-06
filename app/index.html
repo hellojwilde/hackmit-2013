@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+  <title>Jarvis</title>
+  <link rel="stylesheet" href="css/normalize.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <script type="text/x-handlebars">
+    <section class="app">
+    {{outlet}}
+    </section>
+  </script>
+
+  <script type="text/x-handlebars" data-template-name="index">
+    <section class="app-timeline">
+      <ul>
+        {{#each item in controller}}
+        <li>
+          {{#if item.isQuote}}
+          <blockquote>{{item.text}}</blockquote>
+          {{/if}}
+
+          {{#if item.isError}}
+          <blockquote class="from-app">{{item.text}}</blockquote>
+          {{/if}}
+        </li>
+        {{else}}
+        <li class="app-timeline-empty">
+          What can I help you with today?
+        </li>
+        {{/each}}
+      </ul>
+    </section>
+
+    <footer class="app-footer">
+      {{view App.SpeechTextField action="tell"}}
+    </footer>
+  </script>
+
+  <script type="text/x-handlebars" data-template-name="components/map-image">
+    <img width="500" height="200" {{bind-attr src=mapUrl}}/>
+  </script>
+
+  <script> 
+    window.ENV = {};
+    ENV.EXTEND_PROTOTYPES = false;
+  </script>
+
+  <script src="../nlp/lexer/lexicon.js"></script>
+  <script src="../nlp/lexer/lexer.js"></script>
+  <script src="../nlp/lexer/tagger.js"></script>
+  <script src="../nlp/parser/parser.js"></script>
+
+  <script src="js/libs/jquery-1.9.1.js"></script>
+  <script src="js/libs/handlebars-1.0.0.js"></script>
+  <script src="js/libs/ember-1.0.0.js"></script>
+
+  <script src="js/app.js"></script>
+
+</body>
+</html>

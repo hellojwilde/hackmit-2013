@@ -1,0 +1,126 @@
+html, body, body > .ember-view  {
+	height: 100%;
+	width: 100%;
+	background: #333;
+}
+
+.app {
+	background: #444;
+	margin: 0 auto;
+	height: 100%;
+	max-width: 30em;
+	position: relative;
+}
+
+.app-timeline {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 4em;
+	overflow: auto;
+}
+
+.app-timeline ul, .app-timeline li {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.app-timeline img {
+	width: 100%;
+	height: auto;
+}
+
+.app-timeline blockquote {
+	margin: 1em;
+	padding: 1em;
+	background: #666;
+	color: white;
+	position: relative;
+}
+
+.app-timeline blockquote:after {
+	content: '';
+	position: absolute;
+	border-style: solid;
+	border-width: 0.7em 0 0 0.7em;
+	border-color: transparent #666;
+	display: block;
+	width: 0;
+	z-index: 1;
+	right: -0.7em;
+	bottom: 0.3em;
+}
+
+.app-timeline blockquote.from-app {
+	background: #222;
+}
+
+.app-timeline blockquote.from-app:after {
+	left: -0.7em;
+	border-color: transparent #222;
+	border-width: 0.7em 0.7em 0 0;
+}
+
+.app-timeline .options {
+	background: #222;
+	color: white;
+}
+
+.app-timeline .options li {
+	padding: 1em;
+	border-bottom: 1px solid #333;
+}
+
+.app-timeline .options li:last-of-type {
+	border-bottom: 0 none;
+}
+
+.app-timeline .rule {
+	background: #222;
+	color: white;
+}
+
+.app-timeline .rule dt {
+	float: left;
+	font-weight: bold;
+}
+
+.app-timeline .rule dt, .app-timeline .rule dd {
+	padding: 1em;
+}
+
+.app-timeline .rule dd {
+	margin-left: 5em;
+	border-bottom: 1px solid #333;
+}
+
+.app-timeline .rule dd:last-of-type {
+	border-bottom: 0 none;
+}
+
+.app-timeline-empty {
+	text-align: center;
+	font-size: 2.5em;
+	padding: 1em !important;
+	color: #999;
+}
+
+.app-footer {
+	position: absolute;
+	bottom: 0;
+	height: 4em;
+	left: 0;
+	right: 0;
+	text-align: center;
+}
+
+.app-footer input {
+	width: 100%;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	height: 100%;
+	font-size: 1.5em;
+	padding: 0.5em;
+}
