@@ -16,46 +16,66 @@ function parse(input) {
 
 describe("Parser", function () {
 	describe("#parse", function () {
-		it("if mary calls then send hello to bob", function () {
-			assert.deepEqual(
-				parse("if mary calls then send hello to bob"), 
-				{"condition":{"subject":"mary","verb":"calls"},
-				 "action":{"verb":"send","content":"hello","to":"bob"}});
+		// Time Conditions!
+		it("tomorrow", function () {
+			assert.deepEqual(parse("tomorrow"),
+				{"condition":{"subject":"time","verb":"is","to":"tomorrow"},"action":false});
 		});
 
-		it("if mary calls me then send hello to bob", function () {
-			assert.deepEqual(
-				parse("if mary calls me then send hello to bob"),
-				{"condition":{"subject":"mary","verb":"calls","to":"me"},
-				"action":{"verb":"send","content":"hello","to":"bob"}});
+		it("day after tomorrow", function () {
+			assert.deepEqual(parse("day after tomorrow"),
+				{"condition":{"subject":"time","verb":"is","to":"day after tomorrow"},"action":false});
 		});
 
-		it("send hello to bob if mary calls", function () {
-			assert.deepEqual(
-				parse("send hello to bob if mary calls"),
-				{"condition":{"subject":"mary","verb":"calls"},
-				"action":{"verb":"send","content":"hello","to":"bob"}})
+		// Actions!
+		it("send an email to mary jane saying hello, mary!", function () {
+			assert.deepEqual(parse("send an email to mary jane saying hello, mary!"),
+				{"condition":false,"action":{"verb":"send","method":"email","recipient":"mary jane","content":"hello , mary !"}});
 		});
 
-		it("if mary calls me then send hello via text to bob", function () {
-			assert.deepEqual(
-				parse("if mary calls me then send hello via text to bob"),
-				{"condition":{"subject":"mary","verb":"calls","to":"me"},
-				"action":{"verb":"send","content":"hello", "via": "text", "to": "bob"}});
+		it("send an email saying hello to mary jane", function () {
+			assert.deepEqual(parse("send an email saying hello to mary jane"),
+				{"condition":false,"action":{"verb":"send","method":"email","content":"hello","recipient":"mary jane"}})
 		});
 
-		it("if mary calls me then send hello on iMessage to bob", function () {
-			assert.deepEqual(
-				parse("if mary calls me then send hello on iMessage to bob"),
-				{"condition":{"subject":"mary","verb":"calls","to":"me"},
-				"action":{"verb":"send","content":"hello", "to":"bob", "via":"iMessage"}});
+		it("send hello to mary jane via email", function () {
+			assert.deepEqual(parse("send hello to mary jane via email"),
+				{"condition":false,"action":{"verb":"send","content":"hello","recipient":"mary jane","method":"email"}});
 		});
 
-		it("if mary calls me then send hello on iMessage to bob", function () {
-			assert.deepEqual(
-				parse("if mary calls me then send hello on iMessage to bob"),
-					{"condition":{"subject":"mary","verb":"calls","to":"me"},
-					"action":{"verb":"send","content":"hello","via":"iMessage", "to":"bob"}});
+		it("send hello to mary jane", function () {
+			assert.deepEqual(parse("send hello to mary jane"),
+				{"condition":false,"action":{"verb":"send","content":"hello","recipient":"mary jane"}});
+		});
+
+		it("send hello over email", function () {
+			assert.deepEqual(parse("send hello over email"),
+				{"condition":false,"action":{"verb":"send","content":"hello","method":"email"}});
+		});
+
+		it("send an email to mary jane saying hello", function () {
+			assert.deepEqual(parse("send an email to mary jane saying hello"),
+				{"condition":false,"action":{"verb":"send","method":"email","recipient":"mary jane","content":"hello"}});
+		});
+
+		it("send an email saying  hello  to mary jane", function () {
+			assert.deepEqual(parse("send an email saying  hello  to mary jane"),
+				{"condition":false,"action":{"verb":"send","method":"email","content":"hello","recipient":"mary jane"}});
+		});
+
+		it("send an email to mary saying hello to bob I am a proxy", function () {
+			assert.deepEqual(parse("send an email to mary saying hello to bob I am a proxy"),
+				{"condition":false,"action":{"verb":"send","method":"email","recipient":"mary","content":"hello to bob I am a proxy"}});
+		});
+
+		it("send an email to mary saying hello via email I am a proxy", function () {
+			assert.deepEqual(parse("send an email to mary saying hello via email I am a proxy"),
+				{"condition":false,"action":{"verb":"send","method":"email","recipient":"mary","content":"hello via email I am a proxy"}});
+		});
+
+		it("send an email to me saying buy more dish soap", function () {
+			assert.deepEqual(parse("send an email to me saying buy more dish soap "),
+				{"condition":false,"action":{"verb":"send","method":"email","recipient":"me","content":"buy more dish soap"}});
 		});
 	});
 });
