@@ -149,6 +149,7 @@ App.IndexController = Ember.ArrayController.extend(Ember.Evented, {
 	  				var event = Ember.copy(disambig);
 	  				event.type = "rule";
 	  				App.Store.appendToTimeline(event);
+	  				console.log(event);
 	  			}.bind(this));
 	  		}
 	  	} else {
@@ -178,7 +179,24 @@ App.EventController = Ember.ObjectController.extend({
 
 	isRule: Ember.computed(function () {
 		return this.get("type") == "rule";
-	}).property("type")
+	}).property("type"),
+
+	isConditionLocation: Ember.computed(function () {
+		return this.get("condition.type") == "location";
+	}).property("condition.type"),
+
+	isConditionTime: Ember.computed(function () {
+		return this.get("condition.type") == "time";
+	}).property("condition.type"),
+
+	conditionTime: Ember.computed(function () {
+		var time = this.get("condition.to");
+		if (time instanceof Date) {
+			return time.toString("'MMMM d, yyyy");
+		} else {
+			return "";
+		}
+	}).property("condition.to")
 });
 
 App.IndexView = Ember.View.extend({

@@ -40,22 +40,27 @@
 
           {{#if item.isRule}}
           <blockquote class="from-app">
-            Okay, here is your rule:
+            Okay, here's what I'll do:
           </blockquote>
 
           <dl class="rule">
+            {{#if item.condition}}
             <dt>If</dt>
             {{#if item.isConditionLocation}}
-            <dd>at <q>{{item.condition.location.name}}</q></dd>
+            <dd>at <q>{{item.condition.to}}</q></dd>
             {{/if}}
             {{#if item.isConditionTime}}
-            <dd>time is <q>{{item.condition.time.canonical}}</q></dd>
+            <dd>at <q>{{item.conditionTime}}</q></dd>
             {{/if}}
 
             <dt>Then</dt>
+            {{else}}
+            <dt>Do Now</dt>
+            {{/if}}
             <dd>
-              send <q>{{item.response.content}}</q> 
-              to {{item.response.recipient.name}}
+              send <q>{{item.action.content}}</q> 
+              via {{item.action.method}}
+              to {{item.action.recipient}}
             </dd>
           </dl>
           {{/if}}
