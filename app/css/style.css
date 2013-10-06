@@ -8,8 +8,17 @@ html, body, body > .ember-view  {
 	background: #444;
 	margin: 0 auto;
 	height: 100%;
-	max-width: 30em;
+	max-width: 35em;
 	position: relative;
+}
+
+h1 {
+	color: white;
+	text-transform: uppercase;
+	font-size: 1.5em;
+	padding: 1em;
+	padding-bottom: 0.5em;
+	margin: 0;
 }
 
 .app-timeline {
@@ -100,11 +109,28 @@ html, body, body > .ember-view  {
 	border-bottom: 0 none;
 }
 
-.app-timeline-empty {
-	text-align: center;
+.app-timeline-empty p {
+	text-align: left;
 	font-size: 2.5em;
-	padding: 1em !important;
+	padding: 1em 0.6em!important;
 	color: #999;
+	margin: 0 !important;
+}
+
+.app-timeline-empty div {
+	color: white;
+	padding: 1em 1.5em;
+	border-top: 1px solid #333;
+}
+
+.app-timeline-empty div ul {
+	font-size: 1.3em;
+	line-height: 1.4em;
+}
+
+.app-timeline-thinking {
+	padding: 1em !important;
+	color: white;
 }
 
 .app-footer {

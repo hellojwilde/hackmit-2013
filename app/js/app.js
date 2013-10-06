@@ -1,9 +1,5 @@
 App = Ember.Application.create();
 
-App.Router.map(function() {
-  // put your routes here
-});
-
 App.Store = {
 	_timeline: Ember.A(),
 
@@ -53,10 +49,12 @@ App.Disambiguator = {
 			"Mary James"
 		];
 
+		console.log(ambig);
+
 		App.Store.appendToTimeline({
   		type: "question",
   		what: "person",
-  		ambiguous: "mary",
+  		ambiguous: ambig.recipient,
   		options: Ember.A(options)
 		});
 
@@ -84,8 +82,9 @@ App.NLP = {
 		return psr.parse(tagged);
 	},
 
-	startDisambiguation: function (ambig, completeFn) {
+	startDisambiguation: function (ambig, completeFn, indexCtrl) {
 		function _clarifyAction() {
+			indexCtrl.startThinking();
 			App.Disambiguator[ambig.action.verb](ambig.action,
 				function (unambig) {
 					ambig.action = unambig;
@@ -94,6 +93,7 @@ App.NLP = {
 		}
 
 		function _clarifyCond() {
+			indexCtrl.startThinking();
 			App.Disambiguator[ambig.condition.type](ambig.condition, 
 				function (unambig) {
 					ambig.condition = unambig;
@@ -106,6 +106,10 @@ App.NLP = {
 		} else {
 			_clarifyAction();
 		}
+	},
+
+	fillDisambiguation: function (input) {
+		App.Disambiguator.fill(input);
 	},
 
 	endDisambiguation: function () {
@@ -121,45 +125,59 @@ App.IndexRoute = Ember.Route.extend({
 
 App.IndexController = Ember.ArrayController.extend(Ember.Evented, {
 	itemController: 'event',
+	input: "",
+
 	isDisambiguating: false,
+	isThinking: false,
+
+	startThinking: function () { this.set("isThinking", true); },
+	shouldClearThinking: Ember.observer(function () {
+		this.set("isThinking", false);
+	}, "content.@each"),
 
 	shouldScrollToBottom: Ember.observer(function () {
 		this.trigger("shouldScrollToBottom");
 	}, "content.@each"),
 
+	respond: function (input) {
+		this.startThinking();
+		if (!this.get("isDisambiguating")) {
+  		var raw = App.NLP.parse(input);
+  		if (!raw.action) {
+  			App.Store.appendToTimeline({
+		  		type: "error",
+		  		text: "I'm not sure what you mean."
+		  	});
+  		} else {
+  			this.set("isDisambiguating", true);
+  			this.startThinking();
+  			App.NLP.startDisambiguation(raw, function (disambig) {
+  				this.set("isDisambiguating", false);
+
+  				var event = Ember.copy(disambig);
+  				event.type = "rule";
+  				App.Store.appendToTimeline(event);
+  			}.bind(this), this);
+  		}
+  	} else {
+  		if (input.toLowerCase() == "cancel") {
+  			App.NLP.endDisambiguation();
+  			this.et("isDisambiguating", false);
+  		}
+
+  		App.NLP.fillDisambiguation(input);
+  	}
+	},
+
 	actions: {
   	tell: function (input) {
-  		if (!this.get("isDisambiguating")) {
-	  		App.Store.appendToTimeline({
-		  		type: "quote",
-		  		text: input
-		  	});
+  		App.Store.appendToTimeline({
+	  		type: "quote",
+	  		text: input
+	  	});
 
-	  		var raw = App.NLP.parse(input);
-	  		if (!raw.action) {
-	  			App.Store.appendToTimeline({
-			  		type: "error",
-			  		text: "I'm not sure what you mean."
-			  	});
-	  		} else {
-	  			this.set("isDisambiguating", true);
-	  			App.NLP.startDisambiguation(raw, function (disambig) {
-	  				this.set("isDisambiguating", false);
-
-	  				var event = Ember.copy(disambig);
-	  				event.type = "rule";
-	  				App.Store.appendToTimeline(event);
-	  				console.log(event);
-	  			}.bind(this));
-	  		}
-	  	} else {
-	  		if (input.toLowerCase() == "cancel") {
-	  			App.NLP.endDisambiguation();
-	  			this.et("isDisambiguating", false);
-	  		}
-
-	  		App.Disambiguator.fill(input);
-	  	}
+  		this.set("input", "");
+  		this.respond(input);
   	}
   }
 });
@@ -201,21 +219,28 @@ App.EventController = Ember.ObjectController.extend({
 
 App.IndexView = Ember.View.extend({
 	didInsertElement: function () {
-		this.get("controller").on("shouldScrollToBottom", function () {
+		var controller = this.get("controller");
+
+		this.scrollToBottom();
+		controller.on("shouldScrollToBottom", function () {
 			this.scrollToBottom();
 		}.bind(this));
-		this.scrollToBottom();
 	},
 
 	scrollToBottom: function () {
 		var timeline = this.$(".app-timeline");
-		timeline[0].scrollHeight = (timeline[0].scrollTop);
+		timeline[0].scrollTop = timeline[0].scrollHeight;
 	}
 });
 
 App.SpeechTextField = Ember.TextField.extend({
 	attributeBindings: ['x-webkit-speech'],
-	"x-webkit-speech": true
+	"x-webkit-speech": true,
+	didInsertElement: function () {
+		this.$().bind("webkitspeechchange", function () {
+			this.sendAction('action', this.$().val());
+		}.bind(this));
+	}
 });
 
 App.MapImageComponent = Ember.Component.extend({

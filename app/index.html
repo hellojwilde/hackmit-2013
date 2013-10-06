@@ -16,6 +16,8 @@
 
   <script type="text/x-handlebars" data-template-name="index">
     <section class="app-timeline">
+      <h1>Jarvis</h1>
+
       <ul>
         {{#each item in controller}}
         <li>
@@ -67,14 +69,27 @@
         </li>
         {{else}}
         <li class="app-timeline-empty">
-          What can I help you with today?
+          <p>What can I help you with today?</p>
+
+          <div>
+            <h2>Try these</h2>
+            <ul>
+              <li>"send an email to Sarah"</li>
+              <li>"when I am here send hello from MIT to John"</li>
+              <li>"next thursday send just reminding you about taxes to Jacob"</li>
+            </ul>
+          </div>
         </li>
         {{/each}}
+
+        {{#if isThinking}}
+        <li class="app-timeline-thinking">Thinking...</li>
+        {{/if}}
       </ul>
     </section>
 
     <footer class="app-footer">
-      {{view App.SpeechTextField action="tell"}}
+      {{view App.SpeechTextField placeholder="Talk to Jarvis..." valueBinding=input action="tell"}}
     </footer>
   </script>
 

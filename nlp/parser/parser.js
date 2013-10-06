@@ -47,7 +47,7 @@
 		var _chompTag = function (skip) { return (_chomp(skip) || [])[1]; }
 		var _chompValLen = function (skip, len) {
 			var content = [];
-			while (_peekVal() && len >= 0) {
+			while (_peekVal() && len > 0) {
 				content.push(_chompVal(skip));
 				skip = 0;
 				len--;
@@ -128,14 +128,14 @@
 					to: _chompVal()
 				}
 			// "i am at copley square"
-			} else if (_pos("NN", "VBP", "IN", "NN")) {
+			} else if (_pos("NN", "VBP", "IN", ["NN", "NNP"])) {
 				return {
 					type: "location",
 					subject: _chompVal(),
 					verb: _chompVal(),
 					to: (function () { 
 						_chomp(); 
-						return _chompValWhile(function() { return _pos("NN"); });
+						return _chompValWhile(function() { return _pos("NNP","NN"); });
 					})()
 				}
 			}

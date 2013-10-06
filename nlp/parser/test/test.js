@@ -19,12 +19,12 @@ describe("Parser", function () {
 		// Time Conditions!
 		it("tomorrow", function () {
 			assert.deepEqual(parse("tomorrow"),
-				{"condition":{"subject":"time","verb":"is","to":"tomorrow"},"action":false});
+				{"condition":{"type":"time","subject":"time","verb":"is","to":"tomorrow"},"action":false});
 		});
 
 		it("day after tomorrow", function () {
 			assert.deepEqual(parse("day after tomorrow"),
-				{"condition":{"subject":"time","verb":"is","to":"day after tomorrow"},"action":false});
+				{"condition":{"type":"time","subject":"time","verb":"is","to":"day after tomorrow"},"action":false});
 		});
 
 		// Actions!
@@ -58,7 +58,7 @@ describe("Parser", function () {
 				{"condition":false,"action":{"verb":"send","method":"email","recipient":"mary jane","content":"hello"}});
 		});
 
-		it("send an email saying  hello  to mary jane", function () {
+		it("send an email saying  hello to mary jane", function () {
 			assert.deepEqual(parse("send an email saying  hello  to mary jane"),
 				{"condition":false,"action":{"verb":"send","method":"email","content":"hello","recipient":"mary jane"}});
 		});
